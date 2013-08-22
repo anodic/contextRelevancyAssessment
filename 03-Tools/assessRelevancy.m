@@ -1,0 +1,50 @@
+function [relevancyFromAssessment] = assessRelevancy( inputData )
+
+relevancyFromAssessment=zeros(1,12);
+
+% a=1/6 is the middle 1/7 is more conservative (not context) then 1/5 
+a=1/6;
+
+Wno = inline('-2*(1-3*a)/3');
+Wpno = inline('-(1-3*a)/3');
+Wm = inline('0*a');
+Wpyes = inline('a');
+Wyes = inline ('2*a');
+
+score =  0;
+
+for ii = 1: size (inputData,2)
+    score =  0;
+    currentContext = inputData(:,ii);
+    %out = find(currentContext==0);
+    
+    currentContext(find(currentContext==0)) = [];
+              
+    histogram=hist(currentContext,5);
+    
+    
+    score = score + histogram(1)* Wno(a);
+    score = score + histogram(2)* Wpno(a);
+    score = score + histogram(3)* Wm(a);
+    score = score + histogram(4)* Wpyes(a);
+    score = score + histogram(5)* Wyes(a);
+    
+    
+    if score >= 0
+        relevancyFromAssessment(ii)=2;
+    else
+        relevancyFromAssessment(ii)=1;
+    end
+    
+    
+% basic no weight assessment
+%---------------------------------------------------------
+%     if sum(histogram(1:2)) >= sum(histogram(end-1:end))
+%         relevancyFromAssessment(ii)=1;
+%     else
+%         relevancyFromAssessment(ii)=2;
+%     end
+%---------------------------------------------------------
+end
+
+end
